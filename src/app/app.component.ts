@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { ApiService } from './api.service';
-import { CodeModel } from '@ngstack/code-editor';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {Component, OnInit} from '@angular/core';
+import {ApiService} from './api.service';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {Code} from "./model/Code";
+import {Token} from "./model/Token";
 
 @Component({
   selector: 'app-root',
@@ -9,42 +10,32 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  constructor(private servico: ApiService, private modalService: NgbModal){}
 
-  theme = 'vs-dark';
-  title = 'ng-bootstrap-modal-demo';
+  constructor(private apiService: ApiService, private modalService: NgbModal) {
+  }
+
+  examples: Code[];
+  selectedCode: Code;
+  tokenList: Token[];
   closeResult: string;
 
-  codeModel: CodeModel = {
-    language: 'json',
-    uri: 'main.json',
-    value: '{}'
-  };
-
-  options = {
-    contextmenu: true,
-    minimap: {
-      enabled: true
-    }
-  };
-
-  open(content) {
-    this.modalService.open(content, {size: 'lg'}).result.then((result) => {
+  async open(content) {
+    await this.analyze();
+    await this.modalService.open(content, {size: 'lg'}).result.then((result) => {
       this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      
     });
   }
 
-  onCodeChanged() {
-    let value = {"code": "public static void main(String[] args) {}"};
-    this.servico.analyzer(value).subscribe(resp => {
-      console.log(resp)
-    });
+  analyze() {
+    this.apiService.analyze(this.selectedCode).subscribe(resp => this.tokenList = resp.body);
   }
 
-  ngOnInit(){
+  ngOnInit() {
+    this.findAllExamples()
+  }
 
+  private findAllExamples() {
+    this.apiService.findAllExamples().subscribe(resp => this.examples = resp.body);
   }
 
 }
