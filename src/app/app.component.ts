@@ -18,16 +18,25 @@ export class AppComponent implements OnInit {
   selectedCode: Code;
   tokenList: Token[];
   closeResult: string;
+  textCode = {code: ""};
 
   async open(content) {
     await this.analyze();
-    await this.modalService.open(content, {size: 'lg'}).result.then((result) => {
+    await this.modalService.open(content, {size: 'xl'}).result.then((result) => {
       this.closeResult = `Closed with: ${result}`;
     });
   }
 
   analyze() {
-    this.apiService.analyze(this.selectedCode).subscribe(resp => this.tokenList = resp.body);
+    this.apiService.analyze(this.textCode).subscribe(resp => this.tokenList = resp.body);
+  }
+
+  onExampleChange($event) {
+    this.textCode = $event.source.value;
+  }
+
+  textAreaChange($event) {
+    this.textCode.code = $event.target.value;
   }
 
   ngOnInit() {
